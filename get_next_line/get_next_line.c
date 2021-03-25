@@ -6,11 +6,11 @@
 /*   By: msessa <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/15 22:25:06 by msessa            #+#    #+#             */
-/*   Updated: 2021/03/04 12:25:23 by msessa           ###   ########.fr       */
+/*   Updated: 2021/03/25 14:22:17 by msessa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "../../headers/ft_cub3d.h"
 
 static size_t	ft_partial_len(char *buf)
 {
@@ -69,11 +69,15 @@ static int		ft_update_buf(char *buf)
 	return (1);
 }
 
-static int		ft_free_exit(char **line)
+static int		ft_free_exit(char **line, int read_out)
 {
-	free(*line);
-	*line = 0;
-	return (-1);
+	if (read_out < 0)
+	{
+		free(*line);
+		*line = 0;
+		return (-1);
+	}
+	return (0);
 }
 
 int				get_next_line(int fd, char **line)
@@ -81,7 +85,10 @@ int				get_next_line(int fd, char **line)
 	static char	buf[BUFFER_SIZE + 1] = { '\0' };
 	int			read_out;
 
-	if (!BUFFER_SIZE || !line || !(*line = malloc(sizeof(char) * 1)))
+	if (!BUFFER_SIZE || !line)
+		return (-1);
+	*line = malloc(sizeof(char) * 1);
+	if (!*line)
 		return (-1);
 	**line = '\0';
 	while (1)
@@ -94,10 +101,8 @@ int				get_next_line(int fd, char **line)
 				return (1);
 		}
 		read_out = read(fd, buf, BUFFER_SIZE);
-		if (read_out < 0)
-			return (ft_free_exit(line));
-		else if (read_out == 0)
-			return (0);
+		if (read_out <= 0)
+			return (ft_free_exit(line, read_out));
 		buf[read_out] = '\0';
 	}
 }
